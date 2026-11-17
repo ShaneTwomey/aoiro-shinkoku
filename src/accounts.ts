@@ -1,0 +1,70 @@
+export type Kind = 'asset' | 'liability' | 'capital' | 'draw' | 'contribution' | 'revenue' | 'purchase' | 'stockStart' | 'stockEnd' | 'expense';
+type Account = { id: string; ja: string; en: string; kind: Kind; aliases: string[]; line?: number };
+const a = (id: string, ja: string, en: string, kind: Kind, line?: number, ...aliases: string[]): Account =>
+  ({ id, ja, en, kind, aliases, line });
+export const accounts = [
+  a('cash','現金','Cash','asset'),
+  a('current','当座預金','Current account','asset'),
+  a('time','定期預金','Time deposits','asset'),
+  a('bank','その他の預金','Other bank deposits','asset',undefined,'普通預金','預金','普通口座'),
+  a('notesIn','受取手形','Notes receivable','asset'),
+  a('ar','売掛金','Accounts receivable','asset'),
+  a('securities','有価証券','Securities','asset'),
+  a('stock','棚卸資産','Inventory','asset',undefined,'商品','製品','原材料'),
+  a('advances','前払金','Advances paid','asset',undefined,'前渡金'),
+  a('prepaid','前払費用','Prepaid expenses','asset'),
+  a('loansOut','貸付金','Loans receivable','asset'),
+  a('building','建物','Buildings','asset'),
+  a('fixtures','建物附属設備','Building fixtures','asset',undefined,'建物付属設備'),
+  a('machines','機械装置','Machinery','asset'),
+  a('vehicles','車両運搬具','Vehicles','asset',undefined,'車両'),
+  a('equipment','工具器具備品','Equipment','asset',undefined,'備品','工具、器具、備品','工具・器具・備品'),
+  a('land','土地','Land','asset'),
+  a('otherAsset','その他の資産','Other assets','asset',undefined,'仮払金','差入保証金','未収入金','未収金','立替金'),
+  a('notesOut','支払手形','Notes payable','liability'),
+  a('ap','買掛金','Accounts payable','liability'),
+  a('loansIn','借入金','Loans payable','liability',undefined,'短期借入金','長期借入金'),
+  a('accrued','未払金','Accrued payables','liability',undefined,'未払費用','クレジットカード'),
+  a('unearned','前受金','Advances received','liability',undefined,'前受収益'),
+  a('held','預り金','Deposits held','liability',undefined,'預かり金'),
+  a('otherDebt','その他の負債','Other liabilities','liability',undefined,'仮受金'),
+  a('capital','元入金','Opening capital','capital'),
+  a('draw','事業主貸','Owner drawings','draw'),
+  a('contribution','事業主借','Owner contributions','contribution'),
+  a('sales','売上（収入）金額','Business sales','revenue',1,'売上','売上高','売上金','売上収入','売上（収入）'),
+  a('use','家事消費等','Private use of stock','revenue',1,'家事消費'),
+  a('misc','雑収入','Other business receipts','revenue',1),
+  a('stockStart','期首商品（製品）棚卸高','Opening inventory cost','stockStart',2,'期首商品棚卸高','期首棚卸高'),
+  a('purchase','仕入金額','Purchases','purchase',3,'仕入','仕入高'),
+  a('stockEnd','期末商品（製品）棚卸高','Closing inventory credit','stockEnd',5,'期末商品棚卸高','期末棚卸高'),
+  a('taxes','租税公課','Deductible taxes and dues','expense',8),
+  a('freight','荷造運賃','Packing and freight','expense',9),
+  a('utilities','水道光熱費','Utilities','expense',10),
+  a('travel','旅費交通費','Travel and transport','expense',11,'交通費','旅費'),
+  a('telecom','通信費','Communications','expense',12),
+  a('ads','広告宣伝費','Advertising','expense',13,'広告費'),
+  a('entertain','接待交際費','Business entertainment','expense',14,'交際費'),
+  a('insurance','損害保険料','Business insurance','expense',15,'保険料'),
+  a('repairs','修繕費','Repairs','expense',16),
+  a('supplies','消耗品費','Supplies','expense',17,'事務用品費','事務消耗品費'),
+  a('depr','減価償却費','Depreciation','expense',18),
+  a('welfare','福利厚生費','Employee welfare','expense',19),
+  a('wages','給料賃金','Wages','expense',20,'給料','給料手当','給与','給与賃金'),
+  a('contract','外注工賃','Contract work','expense',21,'外注費'),
+  a('interest','利子割引料','Interest and discount charges','expense',22,'支払利息','支払利子'),
+  a('rent','地代家賃','Business rent','expense',23,'家賃'),
+  a('bad','貸倒金','Bad debt','expense',24,'貸倒損失'),
+  a('fees','支払手数料','Fees','expense',25,'手数料','振込手数料'),
+  a('books','新聞図書費','Publications','expense',26,'図書費','書籍費'),
+  a('meet','会議費','Meetings','expense',27),
+  a('dues','諸会費','Membership dues','expense',28),
+  a('research','研修費','Training','expense',29),
+  a('otherExpense','雑費','Miscellaneous expenses','expense',31),
+];
+export const account = Object.fromEntries(accounts.map(a => [a.id, a])) as Record<string, Account>;
+export const balanceKinds: Kind[] = ['asset','liability','capital'];
+export const debitKind = (k: Kind) => ['asset','draw','purchase','stockStart','expense'].includes(k);
+export const bankOrCash = ['cash','current','time','bank'];
+const names = new Map(accounts.flatMap(a => [a.ja, ...a.aliases].map(s => [s.normalize('NFKC'),a.id] as const)));
+export const findAccount = (name: string) => names.get(name.trim().normalize('NFKC'));
+export const depreciable = ['building','fixtures','machines','vehicles','equipment'];
